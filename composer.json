@@ -1,12 +1,14 @@
 {
     "name": "tweedegolf/generator",
+    "homepage": "https://github.com/tweedegolf/generator",
     "description": "Generate code",
     "license": "MIT",
-    "autoload": {
-        "psr-4": {
-            "TweedeGolf\\Generator\\": "src/TweedeGolf/Generator/"
+    "authors": [
+        {
+            "name": "Ruben Nijveld",
+            "email": "ruben@tweedegolf.nl"
         }
-    },
+    ],
     "require": {
         "php": ">= 5.4.0",
         "twig/twig": "~1.15",
@@ -14,5 +16,10 @@
     },
     "require-dev": {
         "phpspec/phpspec": "dev-master"
+    },
+    "autoload": {
+        "psr-4": {
+            "TweedeGolf\\Generator\\": "src/TweedeGolf/Generator/"
+        }
     }
 }

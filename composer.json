@@ -1,0 +1,17 @@
+{
+    "name": "tweedegolf/generator",
+    "description": "Generate code",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "TweedeGolf\\Generator\\": "src/TweedeGolf/Generator/"
+        }
+    },
+    "require": {
+        "twig/twig": "~1.15",
+        "symfony/console": "~2.4"
+    },
+    "require-dev": {
+        "phpspec/phpspec": "dev-master"
+    }
+}

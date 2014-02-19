@@ -1,0 +1,22 @@
+#!/usr/bin/env php
+<?php
+
+require_once __DIR__ . '/../vendor/autoload.php';
+
+// create the generator registry
+$registry = new \TweedeGolf\Generator\Registry\GeneratorRegistry();
+
+// add your generators here
+// $registry->addGenerator(new \MyGenerator());
+
+
+// build the dispatcher
+$locator = new \TweedeGolf\Generator\ResourceLocator\DirectoryResourceLocator(
+    __DIR__ . '/../skeleton/%generator%/'
+);
+$builder = new \TweedeGolf\Generator\Builder\Builder($locator);
+$dispatcher = new \TweedeGolf\Generator\Dispatcher\GeneratorDispatcher($builder, $registry);
+
+// building and running the application
+$application = new \TweedeGolf\Generator\Console\GenerateApplication($dispatcher);
+$application->run();

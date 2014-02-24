@@ -7,6 +7,7 @@ use TweedeGolf\Generator\Action\Argument\ArgumentList;
 use TweedeGolf\Generator\Action\Registry\ActionRegistry;
 use TweedeGolf\Generator\Action\Registry\ActionRegistryInterface;
 use TweedeGolf\Generator\GeneratorInterface;
+use TweedeGolf\Generator\Input\Arguments;
 use TweedeGolf\Generator\ResourceLocator\ResourceLocatorInterface;
 
 abstract class AbstractBuilder implements BuilderInterface
@@ -22,6 +23,12 @@ abstract class AbstractBuilder implements BuilderInterface
      * @var GeneratorInterface
      */
     private $generator;
+
+    /**
+     * Argument list used to call the generator.
+     * @var Arguments
+     */
+    private $arguments;
 
     /**
      * Available actions registry.
@@ -72,10 +79,11 @@ abstract class AbstractBuilder implements BuilderInterface
     /**
      * {@inheritdoc}
      */
-    public function forGenerator(GeneratorInterface $generator)
+    public function forGenerator(GeneratorInterface $generator, Arguments $arguments = null)
     {
         $builder = clone $this;
         $builder->generator = $generator;
+        $builder->arguments = $arguments;
         return $builder;
     }
 
@@ -163,7 +171,7 @@ abstract class AbstractBuilder implements BuilderInterface
         if (null === $this->generator) {
             throw new \BadMethodCallException("Must first bind generator before running actions");
         }
-        $this->generator->did($what, $on, $arguments);
+        $this->generator->did($what, $on, $arguments, $this->depth);
     }
 
     /**
@@ -204,5 +212,13 @@ abstract class AbstractBuilder implements BuilderInterface
     public function __call($method, array $arguments)
     {
         $this->exec($method, $arguments);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getArguments()
+    {
+        return $this->arguments;
     }
 }

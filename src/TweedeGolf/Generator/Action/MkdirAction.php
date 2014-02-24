@@ -31,6 +31,6 @@ class MkdirAction implements ActionInterface
         if (!$simulate) {
             mkdir($dir, $mode, $args->get(2, true));
         }
-        $builder->did('mkdir', $args[0], [$mode]);
+        $builder->did('mkdir', $args[0], [decoct($mode)]);
     }
 }

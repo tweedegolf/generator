@@ -32,6 +32,6 @@ class CreateAction implements ActionInterface
             touch($file);
             chmod($file, $mode);
         }
-        $builder->did('create', $args[0], [$mode]);
+        $builder->did('create', $args[0], [decoct($mode)]);
     }
 }

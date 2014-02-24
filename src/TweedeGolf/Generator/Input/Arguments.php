@@ -46,7 +46,7 @@ class Arguments implements \ArrayAccess, \IteratorAggregate, \Countable
         if ($this->offsetExists($offset)) {
             return $this->data[$offset];
         }
-        throw new ArgumentNotFoundException("Argument {$offset} not found");
+        throw new ArgumentNotFoundException("Argument '{$offset}' not found");
     }
 
     /**
@@ -146,5 +146,13 @@ class Arguments implements \ArrayAccess, \IteratorAggregate, \Countable
     public function __unset($key)
     {
         $this->offsetUnset($key);
+    }
+
+    public function __call($method, array $arguments)
+    {
+        if (strlen($method) > 3 && substr($method, 0, 3) === 'get') {
+            $method = substr($method, 3);
+        }
+        return $this->offsetGet($method);
     }
 }

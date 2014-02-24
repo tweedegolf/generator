@@ -32,12 +32,14 @@ class TemplateAction implements ActionInterface
             throw new ActionFailedException("Target {$target} already exists");
         }
 
+        $variables['args'] = $builder->getArguments();
+
         $content = $this->getTemplateContent($source, $variables);
         if (!$simulate) {
             file_put_contents($target, $content);
             chmod($target, $mode);
         }
-        $builder->did('generate', $args[1], [$mode]);
+        $builder->did('generate', $args[1], [decoct($mode)]);
     }
 
     /**

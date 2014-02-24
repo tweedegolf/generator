@@ -5,6 +5,7 @@ namespace TweedeGolf\Generator\Builder;
 use TweedeGolf\Generator\Action\ActionInterface;
 use TweedeGolf\Generator\Exception\ActionNotFoundException;
 use TweedeGolf\Generator\GeneratorInterface;
+use TweedeGolf\Generator\Input\Arguments;
 
 interface BuilderInterface
 {
@@ -54,9 +55,10 @@ interface BuilderInterface
     /**
      * Retrieve a builder which is a clone of the current one except that it is bound to the given generator.
      * @param GeneratorInterface $generator
+     * @param Arguments          $arguments Arguments used to call the generator.
      * @return BuilderInterface
      */
-    public function forGenerator(GeneratorInterface $generator);
+    public function forGenerator(GeneratorInterface $generator, Arguments $arguments = null);
 
     /**
      * Retrieve a builder which is a clone of the current one except that it has a different base target path.
@@ -90,4 +92,10 @@ interface BuilderInterface
      * @return bool
      */
     public function isSimulated();
+
+    /**
+     * Returns the arguments for the current generator.
+     * @return Arguments
+     */
+    public function getArguments();
 }

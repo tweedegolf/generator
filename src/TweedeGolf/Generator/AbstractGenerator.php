@@ -138,9 +138,25 @@ abstract class AbstractGenerator implements GeneratorInterface
     /**
      * {@inheritdoc}
      */
-    public function did($what, $on = null, array $arguments = array())
+    public function did($what, $on = null, array $arguments = array(), $indent = 0)
     {
-        // TODO: Implement did() method.
+        if (!($this->output instanceof OutputInterface)) {
+            return;
+        }
+
+        if ($on === null) {
+            $on = "";
+        } else {
+            $on = " " . $on;
+        }
+
+        $indent = str_repeat(" ", $indent * 2);
+        $args = implode(', ', $arguments);
+
+        if (strlen($args) > 0) {
+            $args = " <fg=cyan>{$args}</fg=cyan>";
+        }
+        $this->output->writeln("{$indent}<info>{$what}</info>{$args}{$on}");
     }
 
     /**

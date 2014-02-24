@@ -44,8 +44,9 @@ interface GeneratorInterface
      * @param string       $what
      * @param null|string  $on
      * @param array        $arguments
+     * @param int          $indent
      */
-    public function did($what, $on = null, array $arguments = array());
+    public function did($what, $on = null, array $arguments = array(), $indent = 0);
 
     /**
      * @param OutputInterface $output

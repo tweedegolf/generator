@@ -118,6 +118,12 @@ class GenerateCommand extends Command
                 throw new \RuntimeException("Cannot run command interactively");
             }
 
+            if ($simulate) {
+                $output->writeln(
+                    "<comment>The generator will run in simulated mode, no filesystem changes should occur.</comment>"
+                );
+            }
+
             // bind the output and helperset and dispatch the command
             $this->dispatcher->bind($output, $this->getHelperSet());
             $this->dispatcher->dispatch($generator, $arguments, $path, $simulate);

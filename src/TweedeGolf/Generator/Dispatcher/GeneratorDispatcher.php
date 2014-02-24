@@ -103,14 +103,15 @@ class GeneratorDispatcher implements GeneratorDispatcherInterface
         }
 
         // create a builder for this specific generator
-        $builder = $this->builder->forGenerator($generator);
+        $generator->beforeGenerate($arguments);
+        $builder = $this->builder->forGenerator($generator, $arguments);
         if ($path !== null) {
             $builder = $builder->withPath($path);
         }
         $builder->simulated($simulate);
 
         // run the generator
-        $generator->beforeGenerate($arguments);
+        $generator->setOutput($this->output);
         $generator->generate($arguments, $builder, $this);
     }
 

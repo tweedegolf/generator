@@ -81,6 +81,9 @@ class Questioner
         $value = $options['default'];
         while (true) {
             $value = $type->ask($options, $this);
+            if (is_callable($options['modify'])) {
+                $value = call_user_func($options['modify'], $value);
+            }
             if ($options['constraints'] !== null) {
                 $problems = $this->validator->validateValue($value, $options['constraints']);
                 if (count($problems) > 0) {
@@ -187,6 +190,7 @@ class Questioner
             'constraints' => null,
             'required' => false,
             'default' => null,
+            'modify' => null,
         ], $type->getDefaultOptions());
     }
 

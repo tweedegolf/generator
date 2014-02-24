@@ -2,8 +2,7 @@
 
 namespace TweedeGolf\Generator\Console\Input;
 
-use Symfony\Component\Console\Helper\HelperSet;
-use Symfony\Component\Console\Output\OutputInterface;
+use TweedeGolf\Generator\Console\Questioner;
 
 class ChoiceType extends AbstractInputType
 {
@@ -16,12 +15,35 @@ class ChoiceType extends AbstractInputType
     }
 
     /**
-     * Ask for some input
-     * @param array $options
-     * @return mixed
+     * {@inheritdoc}
      */
-    public function ask(array $options, OutputInterface $output, HelperSet $helperSet)
+    public function ask(array $options, Questioner $questioner)
     {
+        $this->preamble($options, $questioner);
+
+        $prompt = $this->getPrompt($options);
         // TODO: Implement ask() method.
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getDefaultOptions()
+    {
+        $options = parent::getDefaultOptions();
+        return array_merge($options, [
+            'prompt_choices' => true,
+            'choices' => [],
+            'callback' => null,
+            'autocomplete' => true,
+        ]);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getPromptDefault(array $options)
+    {
+        return $options['default'];
     }
 }

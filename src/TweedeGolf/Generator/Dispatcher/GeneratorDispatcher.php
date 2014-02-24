@@ -17,6 +17,7 @@ use TweedeGolf\Generator\Exception\OutputNotAvailableException;
 use TweedeGolf\Generator\GeneratorInterface;
 use TweedeGolf\Generator\Input\Arguments;
 use TweedeGolf\Generator\Registry\GeneratorRegistryInterface;
+use TweedeGolf\Generator\Util\ValidationProblemFormatter;
 
 class GeneratorDispatcher implements GeneratorDispatcherInterface
 {
@@ -84,7 +85,8 @@ class GeneratorDispatcher implements GeneratorDispatcherInterface
                 $this->getInputTypeRegistry(),
                 $this->getOutput(),
                 $this->getHelperSet(),
-                $constraints
+                $constraints,
+                $this->validator
             );
             $generator->beforeInteract($arguments);
             $generator->interact($arguments, $questioner);
@@ -193,22 +195,8 @@ class GeneratorDispatcher implements GeneratorDispatcherInterface
                 "Tried to show validation errors, however no output channel available"
             );
         }
-        $messages = [];
 
-        // add header message
-        $problemCount = count($problems);
-        $name = $generator->getName();
-        $messages[] = "While trying to call the generator '{$name}', {$problemCount} problems were found:";
-        $messages[] = "";
-
-        /** @var ConstraintViolation $problem */
-        foreach ($problems as $problem) {
-            $messages[] = "In \$arguments{$problem->getPropertyPath()}: {$problem->getMessage()}";
-        }
-
-        /** @var FormatterHelper $formatter */
-        $formatter = $this->getHelper('formatter');
-        $block = $formatter->formatBlock($messages, 'error', true);
+        $block = ValidationProblemFormatter::format($problems, $generator, $this->getHelper('formatter'));
         $this->getOutput()->writeln($block);
     }
 }

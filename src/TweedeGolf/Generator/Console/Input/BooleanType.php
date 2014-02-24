@@ -2,10 +2,10 @@
 
 namespace TweedeGolf\Generator\Console\Input;
 
-use Symfony\Component\Console\Helper\HelperSet;
-use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Helper\DialogHelper;
+use TweedeGolf\Generator\Console\Questioner;
 
-class BooleanType extends ChoiceType
+class BooleanType extends AbstractInputType
 {
     /**
      * {@inheritdoc}
@@ -16,12 +16,30 @@ class BooleanType extends ChoiceType
     }
 
     /**
-     * Ask for some input
-     * @param array $options
-     * @return mixed
+     * {@inheritdoc}
      */
-    public function ask(array $options, OutputInterface $output, HelperSet $helperSet)
+    public function ask(array $options, Questioner $questioner)
     {
-        // TODO: Implement ask() method.
+        $this->preamble($options, $questioner);
+
+        /** @var DialogHelper $dialog */
+        $dialog = $questioner->getHelper('dialog');
+        return $dialog->askConfirmation($questioner->getOutput(), $this->getPrompt($options), $options['default']);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getPromptDefault(array $options)
+    {
+        if ($options['default'] === true) {
+            return 'Y/n';
+        }
+
+        if ($options['default'] === false) {
+            return 'y/N';
+        }
+
+        return 'y/n';
     }
 }

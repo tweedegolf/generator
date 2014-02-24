@@ -2,8 +2,8 @@
 
 namespace TweedeGolf\Generator\Console\Input;
 
-use Symfony\Component\Console\Helper\HelperSet;
-use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Helper\DialogHelper;
+use TweedeGolf\Generator\Console\Questioner;
 
 class StringType extends AbstractInputType
 {
@@ -16,12 +16,14 @@ class StringType extends AbstractInputType
     }
 
     /**
-     * Ask for some input
-     * @param array $options
-     * @return mixed
+     * {@inheritdoc}
      */
-    public function ask(array $options, OutputInterface $output, HelperSet $helperSet)
+    public function ask(array $options, Questioner $questioner)
     {
-        // TODO: Implement ask() method.
+        $this->preamble($options, $questioner);
+
+        /** @var DialogHelper $dialog */
+        $dialog = $questioner->getHelper('dialog');
+        return $dialog->ask($questioner->getOutput(), $this->getPrompt($options), $options['default']);
     }
 }

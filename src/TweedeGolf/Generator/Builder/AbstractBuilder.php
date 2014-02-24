@@ -171,6 +171,16 @@ abstract class AbstractBuilder implements BuilderInterface
         if (null === $this->generator) {
             throw new \BadMethodCallException("Must first bind generator before running actions");
         }
+        $path = $this->path;
+        if ($path[strlen($path) - 1] === '/' || $path[strlen($path - 1)] === '\\') {
+            $path = substr($path, 0, -1);
+        }
+
+        if ($path === $on) {
+            $on = '.';
+        } else if (strpos($on, $path) === 0 && ($on[strlen($path)] === '/' || $on[strlen($path)] === '\\')) {
+            $on = substr($on, strlen($path) + 1);
+        }
         $this->generator->did($what, $on, $arguments, $this->depth);
     }
 

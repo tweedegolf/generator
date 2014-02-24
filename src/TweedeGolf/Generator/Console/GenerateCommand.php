@@ -20,9 +20,27 @@ class GenerateCommand extends Command
      */
     private $dispatcher;
 
+    /**
+     * @var array
+     */
+    private $generatorDefinition;
+
+    /**
+     * Set the dispatcher for running generators.
+     * @param GeneratorDispatcherInterface $dispatcher
+     */
     public function setDispatcher(GeneratorDispatcherInterface $dispatcher)
     {
         $this->dispatcher = $dispatcher;
+    }
+
+    /**
+     * Array of InputArgument and InputOption elements defining the standard generator arguments.
+     * @return array
+     */
+    public function getGeneratorDefinition()
+    {
+        return $this->generatorDefinition;
     }
 
     /**
@@ -33,13 +51,40 @@ class GenerateCommand extends Command
         $this
             ->setName('generate')
             ->setAliases(['tg:generate', 'tweedegolf:generate'])
-            ->setDescription('Generate things')
-            ->addArgument('generator', InputArgument::OPTIONAL, 'The generator to use')
-            ->addArgument('variables', InputArgument::IS_ARRAY | InputArgument::OPTIONAL, 'Variables for the generator')
-            ->addOption('simulate', 's', InputOption::VALUE_NONE, 'If set, only simulate actions to be executed')
-            ->addOption('path', 'p', InputOption::VALUE_REQUIRED, 'Base path for generating the results, current working directory by default')
+            ->setDescription('Generate code for your project')
             ->ignoreValidationErrors()
         ;
+
+        $this->generatorDefinition = [
+            $this->getGeneratorArgument(true),
+            new InputOption('simulate', 'm', InputOption::VALUE_NONE, 'If set, only simulate actions to be executed'),
+            new InputOption(
+                'path',
+                'p',
+                InputOption::VALUE_REQUIRED,
+                'Base path for generating the results, current working directory by default'
+            ),
+            new InputOption('interactive', 'i', InputOption::VALUE_NONE, 'Force running the command interactively'),
+        ];
+
+        // by default the generator command uses a slightly different command
+        $defaultDefinition = $this->generatorDefinition;
+        $defaultDefinition[0] = $this->getGeneratorArgument(false);
+        $defaultDefinition[] = new InputArgument(
+            'variables',
+            InputArgument::IS_ARRAY | InputArgument::OPTIONAL,
+            'Variables for the generator'
+        );
+        $this->setDefinition($defaultDefinition);
+    }
+
+    private function getGeneratorArgument($required = true)
+    {
+        return new InputArgument(
+            'generator',
+            $required ? InputArgument::REQUIRED : InputArgument::OPTIONAL,
+            'The generator to use'
+        );
     }
 
     /**
@@ -59,8 +104,23 @@ class GenerateCommand extends Command
         } elseif (null !== $generatorName) {
             $simulate = $input->getOption('simulate');
             $path = $input->getOption('path');
+            $interactive = $input->getOption('interactive');
 
-            $this->dispatcher->dispatch($generatorName, $input, $path, $simulate);
+            // retrieve generator
+            $generator = $this->dispatcher->getRegistry()->getGenerator($generatorName);
+
+            // get arguments from command line
+            $resolver = new CommandInputResolver($this->getApplication(), $this->getGeneratorDefinition());
+            $arguments = $resolver->resolve($input, $generator, $interactive);
+
+            // if interactivity is required but not available, stop right here
+            if ($arguments->isForcedInteractive() && !$input->isInteractive()) {
+                throw new \RuntimeException("Cannot run command interactively");
+            }
+
+            // bind the output and helperset and dispatch the command
+            $this->dispatcher->bind($output, $this->getHelperSet());
+            $this->dispatcher->dispatch($generator, $arguments, $path, $simulate);
         } else {
             $this->showGeneratorList($output);
         }
@@ -85,13 +145,6 @@ class GenerateCommand extends Command
 
         $descriptor = new DescriptorHelper();
         $descriptor->describe($output, $definition);
-
-//        if ($generator->hasLongDescription()) {
-//            $output->writeln("");
-//            foreach ($generator->getLongDescription() as $line) {
-//                $output->writeln($line);
-//            }
-//        }
     }
 
     /**

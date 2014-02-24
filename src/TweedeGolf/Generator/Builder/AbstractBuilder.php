@@ -148,7 +148,7 @@ abstract class AbstractBuilder implements BuilderInterface
             null !== parse_url($file, PHP_URL_SCHEME)
         ) {
             return $file;
-        } elseif ($this->path[-1] === '/' || $this->path[-1] === '\\') {
+        } elseif ($this->path[strlen($this->path) - 1] === '/' || $this->path[strlen($this->path) - 1] === '\\') {
             return $this->path . $file;
         } else {
             return $this->path . '/' . $file;

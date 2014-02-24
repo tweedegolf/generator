@@ -2,7 +2,20 @@
 
 namespace TweedeGolf\Generator\Dispatcher;
 
+use Symfony\Component\Console\Helper\FormatterHelper;
+use Symfony\Component\Console\Helper\HelperSet;
+use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Validator\Constraints\Collection;
+use Symfony\Component\Validator\ConstraintViolation;
+use Symfony\Component\Validator\ConstraintViolationList;
+use Symfony\Component\Validator\Validator;
 use TweedeGolf\Generator\Builder\BuilderInterface;
+use TweedeGolf\Generator\Console\Input\Registry\InputTypeRegistryInterface;
+use TweedeGolf\Generator\Console\Questioner;
+use TweedeGolf\Generator\Exception\GeneratorException;
+use TweedeGolf\Generator\Exception\OutputNotAvailableException;
+use TweedeGolf\Generator\GeneratorInterface;
+use TweedeGolf\Generator\Input\Arguments;
 use TweedeGolf\Generator\Registry\GeneratorRegistryInterface;
 
 class GeneratorDispatcher implements GeneratorDispatcherInterface
@@ -17,10 +30,36 @@ class GeneratorDispatcher implements GeneratorDispatcherInterface
      */
     private $registry;
 
-    public function __construct(BuilderInterface $builder, GeneratorRegistryInterface $registry)
-    {
+    /**
+     * @var OutputInterface
+     */
+    private $output;
+
+    /**
+     * @var HelperSet
+     */
+    private $helperSet;
+
+    /**
+     * @var InputTypeRegistryInterface
+     */
+    private $inputTypes;
+
+    /**
+     * @var Validator
+     */
+    private $validator;
+
+    public function __construct(
+        BuilderInterface $builder,
+        GeneratorRegistryInterface $registry,
+        InputTypeRegistryInterface $inputTypes,
+        Validator $validator
+    ) {
         $this->builder = $builder;
         $this->registry = $registry;
+        $this->inputTypes = $inputTypes;
+        $this->validator = $validator;
     }
 
     /**
@@ -32,12 +71,47 @@ class GeneratorDispatcher implements GeneratorDispatcherInterface
             $generator = $this->registry->getGenerator($generator);
         }
 
+        if (is_array($arguments)) {
+            $arguments = new Arguments($arguments);
+        }
+
+        $generator->before($arguments);
+        $constraints = $generator->getConstraints();
+
+        // retrieve interactive input
+        if ($arguments->isForcedInteractive()) {
+            $questioner = new Questioner(
+                $this->getInputTypeRegistry(),
+                $this->getOutput(),
+                $this->getHelperSet(),
+                $constraints
+            );
+            $generator->beforeInteract($arguments);
+            $generator->interact($arguments, $questioner);
+        }
+
+        // run validation
+        $generator->beforeValidate($arguments);
+        $constraints = new Collection($constraints);
+        $constraints->allowExtraFields = true;
+        $problems = $this->validator->validateValue($arguments->getData(), $constraints);
+
+        // stop if any problems are found
+        if (count($problems) > 0) {
+            $this->showValidationProblems($problems, $generator);
+            throw new GeneratorException("Generator failed because of validation errors");
+        }
+
+        // create a builder for this specific generator
         $builder = $this->builder->forGenerator($generator);
         if ($path !== null) {
             $builder = $builder->withPath($path);
         }
         $builder->simulated($simulate);
-        $generator->generate($builder, $this);
+
+        // run the generator
+        $generator->beforeGenerate($arguments);
+        $generator->generate($arguments, $builder, $this);
     }
 
     /**
@@ -54,5 +128,86 @@ class GeneratorDispatcher implements GeneratorDispatcherInterface
     public function getRegistry()
     {
         return $this->registry;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getInputTypeRegistry()
+    {
+        return $this->inputTypes;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function bind(OutputInterface $output, HelperSet $helperSet)
+    {
+        $this->output = $output;
+        $this->helperSet = $helperSet;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function bound()
+    {
+        return $this->output !== null;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getOutput()
+    {
+        return $this->output;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getHelperSet()
+    {
+        return $this->helperSet;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getHelper($helper)
+    {
+        return $this->getHelperSet()->get($helper);
+    }
+
+    /**
+     * Displays output results of validation problems.
+     * @param ConstraintViolationList $problems
+     * @param GeneratorInterface      $generator
+     * @throws OutputNotAvailableException
+     */
+    public function showValidationProblems(ConstraintViolationList $problems, GeneratorInterface $generator)
+    {
+        if (!$this->bound()) {
+            throw new OutputNotAvailableException(
+                "Tried to show validation errors, however no output channel available"
+            );
+        }
+        $messages = [];
+
+        // add header message
+        $problemCount = count($problems);
+        $name = $generator->getName();
+        $messages[] = "While trying to call the generator '{$name}', {$problemCount} problems were found:";
+        $messages[] = "";
+
+        /** @var ConstraintViolation $problem */
+        foreach ($problems as $problem) {
+            $messages[] = "In \$arguments{$problem->getPropertyPath()}: {$problem->getMessage()}";
+        }
+
+        /** @var FormatterHelper $formatter */
+        $formatter = $this->getHelper('formatter');
+        $block = $formatter->formatBlock($messages, 'error', true);
+        $this->getOutput()->writeln($block);
     }
 }

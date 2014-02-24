@@ -10,12 +10,19 @@ $registry = new \TweedeGolf\Generator\Registry\GeneratorRegistry();
 // $registry->addGenerator(new \MyGenerator());
 
 
+// create the input type registry
+$types = new \TweedeGolf\Generator\Console\Input\Registry\InputTypeRegistry();
+
+// add your input types here
+// $types->addType(new \MyInputType(), 'my_type_name');
+
 // build the dispatcher
 $locator = new \TweedeGolf\Generator\ResourceLocator\DirectoryResourceLocator(
     __DIR__ . '/../skeleton/%generator%/'
 );
 $builder = new \TweedeGolf\Generator\Builder\Builder($locator);
-$dispatcher = new \TweedeGolf\Generator\Dispatcher\GeneratorDispatcher($builder, $registry);
+$validator = \Symfony\Component\Validator\Validation::createValidator();
+$dispatcher = new \TweedeGolf\Generator\Dispatcher\GeneratorDispatcher($builder, $registry, $types, $validator);
 
 // building and running the application
 $application = new \TweedeGolf\Generator\Console\GenerateApplication($dispatcher);

@@ -32,7 +32,6 @@ class ChoiceType extends AbstractInputType
     {
         $options = parent::getDefaultOptions();
         return array_merge($options, [
-            'prompt_choices' => true,
             'choices' => [],
             'callback' => null,
             'autocomplete' => true,

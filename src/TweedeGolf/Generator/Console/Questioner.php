@@ -10,13 +10,12 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\Constraints\Collection;
 use Symfony\Component\Validator\ConstraintViolation;
-use Symfony\Component\Validator\Validator;
+use Symfony\Component\Validator\ValidatorInterface;
 use TweedeGolf\Generator\Console\Input\InputTypeInterface;
 use TweedeGolf\Generator\Console\Input\Registry\InputTypeRegistryInterface;
 use TweedeGolf\Generator\Exception\GeneratorException;
 use TweedeGolf\Generator\Exception\InputTypeNotFoundException;
 use TweedeGolf\Generator\Input\Arguments;
-use TweedeGolf\Generator\Util\ValidationProblemFormatter;
 
 class Questioner
 {
@@ -41,7 +40,7 @@ class Questioner
     private $constraints;
 
     /**
-     * @var Validator
+     * @var ValidatorInterface
      */
     private $validator;
 
@@ -50,7 +49,7 @@ class Questioner
         OutputInterface $output,
         HelperSet $helperSet,
         array $constraints,
-        Validator $validator
+        ValidatorInterface $validator
     ) {
         $this->types = $types;
         $this->output = $output;

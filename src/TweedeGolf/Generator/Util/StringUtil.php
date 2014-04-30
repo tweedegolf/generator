@@ -20,10 +20,6 @@ class StringUtil
             return $content;
         }
         $end = $offset + $limit;
-
-
-
-        $index = 0;
         $lastIndex = 0;
 
         $result = "";

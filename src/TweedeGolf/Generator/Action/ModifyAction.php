@@ -4,15 +4,10 @@ namespace TweedeGolf\Generator\Action;
 
 use TweedeGolf\Generator\Action\Argument\ArgumentList;
 use TweedeGolf\Generator\Builder\BuilderInterface;
+use TweedeGolf\Generator\Exception\ActionFailedException;
 
 class ModifyAction implements ActionInterface
 {
-    const AFTER = 'after';
-    const BEFORE = 'before';
-    const PREPEND = 'prepend';
-    const APPEND = 'append';
-    const REGEX = 'regex';
-
     /**
      * {@inheritdoc}
      */
@@ -26,11 +21,23 @@ class ModifyAction implements ActionInterface
      */
     public function execute(ArgumentList $args, BuilderInterface $builder, $simulate)
     {
+        $file = $builder->target($args[0]);
+        $modifier = $args[1];
 
-        // TODO: Implement ModifyAction::execute() method.
+        if (!is_callable($modifier)) {
+            throw new ActionFailedException("Modifier parameter should be a callable");
+        }
 
-        $builder->exec('modify', [
-            [ModifyAction::AFTER . ModifyAction::REGEX, 'Symfony\\'], [ModifyAction::BEFORE, ''], []
-        ]);
+        if (!file_exists($file)) {
+            throw new ActionFailedException("File {$file} does not exist, cannot modify");
+        }
+        $contents = file_get_contents($file);
+
+        $modified = $modifier($contents);
+        if (!$simulate && is_string($modified)) {
+            file_put_contents($file, $modified);
+        }
+
+        $builder->did('modify', $args[0]);
     }
 }

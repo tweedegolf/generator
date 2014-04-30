@@ -8,7 +8,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Validator\Constraints\Collection;
 use Symfony\Component\Validator\ConstraintViolation;
 use Symfony\Component\Validator\ConstraintViolationList;
-use Symfony\Component\Validator\Validator;
+use Symfony\Component\Validator\ValidatorInterface;
 use TweedeGolf\Generator\Builder\BuilderInterface;
 use TweedeGolf\Generator\Console\Input\Registry\InputTypeRegistryInterface;
 use TweedeGolf\Generator\Console\Questioner;
@@ -47,7 +47,7 @@ class GeneratorDispatcher implements GeneratorDispatcherInterface
     private $inputTypes;
 
     /**
-     * @var Validator
+     * @var ValidatorInterface
      */
     private $validator;
 
@@ -55,7 +55,7 @@ class GeneratorDispatcher implements GeneratorDispatcherInterface
         BuilderInterface $builder,
         GeneratorRegistryInterface $registry,
         InputTypeRegistryInterface $inputTypes,
-        Validator $validator
+        ValidatorInterface $validator
     ) {
         $this->builder = $builder;
         $this->registry = $registry;

@@ -13,8 +13,8 @@ use Symfony\Component\Validator\ConstraintViolation;
 use Symfony\Component\Validator\ValidatorInterface;
 use TweedeGolf\Generator\Console\Input\InputTypeInterface;
 use TweedeGolf\Generator\Console\Input\Registry\InputTypeRegistryInterface;
-use TweedeGolf\Generator\Exception\GeneratorException;
 use TweedeGolf\Generator\Exception\InputTypeNotFoundException;
+use TweedeGolf\Generator\Exception\InvalidInputException;
 use TweedeGolf\Generator\Input\Arguments;
 
 class Questioner
@@ -150,7 +150,7 @@ class Questioner
      * @param array                     $options
      * @param string|InputTypeInterface $type
      * @return array
-     * @throws GeneratorException
+     * @throws InvalidInputException
      * @throws InputTypeNotFoundException
      */
     private function validateAndUpdateOptions(array $options, $type)
@@ -167,7 +167,7 @@ class Questioner
         foreach ($options as $key => $value) {
             if (!array_key_exists($key, $defaults)) {
                 $allowed = implode(', ', array_keys($defaults));
-                throw new GeneratorException(
+                throw new InvalidInputException(
                     "Found non-default option '{$key}', only allowed to use one of {$allowed}."
                 );
             }

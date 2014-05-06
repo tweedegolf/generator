@@ -12,8 +12,8 @@ use Symfony\Component\Validator\ValidatorInterface;
 use TweedeGolf\Generator\Builder\BuilderInterface;
 use TweedeGolf\Generator\Console\Input\Registry\InputTypeRegistryInterface;
 use TweedeGolf\Generator\Console\Questioner;
-use TweedeGolf\Generator\Exception\GeneratorException;
 use TweedeGolf\Generator\Exception\OutputNotAvailableException;
+use TweedeGolf\Generator\Exception\ValidationException;
 use TweedeGolf\Generator\GeneratorInterface;
 use TweedeGolf\Generator\Input\Arguments;
 use TweedeGolf\Generator\Registry\GeneratorRegistryInterface;
@@ -101,7 +101,7 @@ class GeneratorDispatcher implements GeneratorDispatcherInterface
         // stop if any problems are found
         if (count($problems) > 0) {
             $this->showValidationProblems($problems, $generator);
-            throw new GeneratorException("Generator failed because of validation errors");
+            throw new ValidationException("Generator failed because of validation errors");
         }
 
         // create a builder for this specific generator

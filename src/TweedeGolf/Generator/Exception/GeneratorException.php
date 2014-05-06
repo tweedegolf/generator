@@ -3,9 +3,8 @@
 namespace TweedeGolf\Generator\Exception;
 
 /**
- * Generic generator exception.
+ * Generator exceptions
  */
-class GeneratorException extends \Exception
+interface GeneratorException
 {
-
 }

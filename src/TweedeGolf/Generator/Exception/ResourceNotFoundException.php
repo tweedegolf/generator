@@ -2,7 +2,7 @@
 
 namespace TweedeGolf\Generator\Exception;
 
-class ResourceNotFoundException extends GeneratorException
+class ResourceNotFoundException extends \RuntimeException implements GeneratorException
 {
 
 }

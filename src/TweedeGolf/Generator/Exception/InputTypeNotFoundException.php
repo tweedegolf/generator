@@ -2,7 +2,7 @@
 
 namespace TweedeGolf\Generator\Exception;
 
-class InputTypeNotFoundException extends \LogicException
+class InputTypeNotFoundException extends \LogicException implements GeneratorException
 {
 
 }

@@ -2,7 +2,7 @@
 
 namespace TweedeGolf\Generator\Exception;
 
-class NotEnoughArgumentsException extends \LogicException
+class NotEnoughArgumentsException extends \LogicException implements GeneratorException
 {
 
 }

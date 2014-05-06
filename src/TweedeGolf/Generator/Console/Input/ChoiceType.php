@@ -22,6 +22,7 @@ class ChoiceType extends AbstractInputType
         $this->preamble($options, $questioner);
 
         $prompt = $this->getPrompt($options);
+
         // TODO: Implement ask() method.
     }
 

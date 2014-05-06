@@ -2,7 +2,7 @@
 
 namespace TweedeGolf\Generator\Exception;
 
-class ActionFailedException extends \RuntimeException
+class ActionFailedException extends \RuntimeException implements GeneratorException
 {
 
 }

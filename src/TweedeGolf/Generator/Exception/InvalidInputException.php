@@ -2,7 +2,7 @@
 
 namespace TweedeGolf\Generator\Exception;
 
-class InvalidInputException extends \RuntimeException
+class InvalidInputException extends \RuntimeException implements GeneratorException
 {
 
 }
